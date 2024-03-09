@@ -11,7 +11,12 @@
                 "/opt/ros/humble/include/rcl_yaml_param_parser/**",
                 "/opt/ros/humble/include/rosidl_runtime_c/**",
                 "/opt/ros/humble/include/rosidl_typesupport_interface/**",
-                "/opt/ros/humble/include/**/**"
+                "/opt/ros/humble/include/**/**",
+                "/usr/include/opencv4/**",
+                "/usr/include/opencv4",
+                "/opt/ros/humble/include/rclcpp",
+                "/opt/ros/humble/include/sensor_msgs",
+                "/opt/ros/humble/include/cv_bridge"
             ],
             "defines": [],
             "compilerPath": "/usr/bin/clang-14",

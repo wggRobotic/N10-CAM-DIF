@@ -16,26 +16,29 @@
 #include <functional>
 #include <memory>
 #include <string>
+#include <opencv2/opencv.hpp>
+#include <sensor_msgs/msg/compressed_image.hpp>
+#include <cv_bridge/cv_bridge.h>
+
 
 #include "rclcpp/rclcpp.hpp"
 #include "std_msgs/msg/string.hpp"
+#include "Motioncapture.cpp"
 
 using namespace std::chrono_literals;
 using std::placeholders::_1;
 
-/* This example creates a subclass of Node and uses std::bind() to register a
- * member function as a callback from the timer. */
-
+// Kevin is the guy for communication ;)
 class Kevin : public rclcpp::Node
 {
 public:
   Kevin()
   : Node("CamDif"), count_(0)
   {
-    subscription_ = this->create_subscription<std_msgs::msg::String>(
-      "topic", 10, std::bind(&Kevin::topic_callback, this, _1));
+    subscription_ = this->create_subscription<sensor_msgs::msg::CompressedImage>(
+      "cam_pub/compressed", 10, std::bind(&Kevin::topic_callback, this, _1));
 
-    publisher_ = this->create_publisher<std_msgs::msg::String>("camdif", 10);
+    publisher_ = this->create_publisher<sensor_msgs::msg::CompressedImage>("camdif", 10);
     timer_ = this->create_wall_timer(
       500ms, std::bind(&Kevin::timer_callback, this));
   }
@@ -44,17 +47,18 @@ private:
   void timer_callback(){
 
   }
-  void topic_callback(const std_msgs::msg::String & msg) const
+  void topic_callback(const sensor_msgs::msg::CompressedImage & msg)
   {
-    message = msg;
+    message = mc.detection(msg);
     publisher_ ->publish(message);
   }
-  std_msgs::msg::String *messagePtr = new std_msgs::msg::String();
-  std_msgs::msg::String &message = *messagePtr;
+  sensor_msgs::msg::CompressedImage *messagePtr = new sensor_msgs::msg::CompressedImage();
+  sensor_msgs::msg::CompressedImage &message = *messagePtr;
   rclcpp::TimerBase::SharedPtr timer_;
-  rclcpp::Publisher<std_msgs::msg::String>::SharedPtr publisher_;
-  rclcpp::Subscription<std_msgs::msg::String>::SharedPtr subscription_;
+  rclcpp::Publisher<sensor_msgs::msg::CompressedImage>::SharedPtr publisher_;
+  rclcpp::Subscription<sensor_msgs::msg::CompressedImage>::SharedPtr subscription_;
   size_t count_;
+  Motioncapture mc;
 };
 
 int main(int argc, char * argv[])
