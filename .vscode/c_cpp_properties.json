@@ -16,7 +16,10 @@
                 "/usr/include/opencv4",
                 "/opt/ros/humble/include/rclcpp",
                 "/opt/ros/humble/include/sensor_msgs",
-                "/opt/ros/humble/include/cv_bridge"
+                "/opt/ros/humble/include/cv_bridge",
+                "${workspaceFolder}/include",
+                "/opt/ros/humble/include/image_transport",
+                "/opt/ros/humble/include"
             ],
             "defines": [],
             "compilerPath": "/usr/bin/clang-14",

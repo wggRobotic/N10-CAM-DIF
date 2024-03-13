@@ -11,6 +11,9 @@ find_package(rclcpp REQUIRED)
 find_package(std_msgs REQUIRED)
 find_package(sensor_msgs REQUIRED)
 find_package(OpenCV REQUIRED)
+find_package(cv_bridge REQUIRED)
+find_package(image_transport REQUIRED)
+find_package(compressed_image_transport REQUIRED)
 add_executable(talker src/publisher_member_function.cpp)
 ament_target_dependencies(talker rclcpp std_msgs)
 install(TARGETS
@@ -19,11 +22,11 @@ install(TARGETS
 add_executable(listener src/subscriber_member_function.cpp)
 ament_target_dependencies(listener rclcpp std_msgs)
 install(TARGETS
-    talker
     listener
     DESTINATION lib/${PROJECT_NAME})
-add_executable(Kevin src/Kevin.cpp)
-ament_target_dependencies(Kevin rclcpp std_msgs)
+add_executable(Kevin src/Kevin.cpp src/Motioncapture.cpp)
+target_include_directories(Kevin PUBLIC "include")
+ament_target_dependencies(Kevin rclcpp std_msgs OpenCV sensor_msgs cv_bridge compressed_image_transport image_transport)
   install(TARGETS
     Kevin
     DESTINATION lib/${PROJECT_NAME})

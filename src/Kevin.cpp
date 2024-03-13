@@ -20,10 +20,10 @@
 #include <sensor_msgs/msg/compressed_image.hpp>
 #include <cv_bridge/cv_bridge.h>
 
-
 #include "rclcpp/rclcpp.hpp"
 #include "std_msgs/msg/string.hpp"
-#include "Motioncapture.cpp"
+#include "image_transport/image_transport.hpp"
+#include <cam_dif/Motioncapture.hpp>
 
 using namespace std::chrono_literals;
 using std::placeholders::_1;
@@ -33,38 +33,71 @@ class Kevin : public rclcpp::Node
 {
 public:
   Kevin()
-  : Node("CamDif"), count_(0)
+      : Node("Kevin")
   {
-    subscription_ = this->create_subscription<sensor_msgs::msg::CompressedImage>(
-      "cam_pub/compressed", 10, std::bind(&Kevin::topic_callback, this, _1));
+  }
 
-    publisher_ = this->create_publisher<sensor_msgs::msg::CompressedImage>("camdif", 10);
-    timer_ = this->create_wall_timer(
-      500ms, std::bind(&Kevin::timer_callback, this));
+  void init(image_transport::ImageTransport &it)
+  {
+    sub = it.subscribe("/cam_pub", 10, std::bind(&Kevin::topic_callback, this, std::placeholders::_1));
+    pub = it.advertise("/kevin", 10);
   }
 
 private:
-  void timer_callback(){
-
-  }
-  void topic_callback(const sensor_msgs::msg::CompressedImage & msg)
+  void topic_callback(const sensor_msgs::msg::Image::ConstSharedPtr &msg)
   {
-    message = mc.detection(msg);
-    publisher_ ->publish(message);
+    auto width = msg->width;
+    auto height = msg->height;
+    auto step = msg->step;
+    auto data = msg->data;
+
+    if (prev_data.empty())
+    {
+      for (size_t i = 0; i < data.size(); i++)
+        prev_data.push_back(data[i]);
+    }
+    else
+    {
+      for (uint32_t y = 0; y < height; y++)
+      {
+        for (uint32_t x = 0; x < step; x ++)
+        {
+          auto base = x + y * step;
+            auto a = data[base];
+            auto b = prev_data[base];
+
+            data[base] = a - b;
+            prev_data[base] = a;
+        }
+      }
+      auto message = std::make_shared<sensor_msgs::msg::Image>();
+      message->width = width;
+      message->height = height;
+      message->step = step;
+      message->encoding = msg->encoding;
+      message->header = msg->header;
+      message->is_bigendian = msg->is_bigendian;
+      message->data = data;
+      pub.publish(message);
+    }
   }
-  sensor_msgs::msg::CompressedImage *messagePtr = new sensor_msgs::msg::CompressedImage();
-  sensor_msgs::msg::CompressedImage &message = *messagePtr;
-  rclcpp::TimerBase::SharedPtr timer_;
-  rclcpp::Publisher<sensor_msgs::msg::CompressedImage>::SharedPtr publisher_;
-  rclcpp::Subscription<sensor_msgs::msg::CompressedImage>::SharedPtr subscription_;
-  size_t count_;
-  Motioncapture mc;
+
+  image_transport::Subscriber sub;
+  image_transport::Publisher pub;
+
+  std::vector<uchar> prev_data;
+
+  MotionCapture mc;
 };
 
-int main(int argc, char * argv[])
+int main(int argc, char *argv[])
 {
   rclcpp::init(argc, argv);
-  rclcpp::spin(std::make_shared<Kevin>());
+
+  auto kevin = std::make_shared<Kevin>();
+  image_transport::ImageTransport it(kevin);
+  kevin->init(it);
+  rclcpp::spin(kevin);
   rclcpp::shutdown();
   return 0;
 }
