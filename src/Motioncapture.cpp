@@ -1,46 +1,47 @@
 #include <cam_dif/Motioncapture.hpp>
 
-sensor_msgs::msg::CompressedImage MotionCapture::detection(const sensor_msgs::msg::CompressedImage &ci)
+void MotionCapture::detection(sensor_msgs::msg::Image::SharedPtr &ImageOutput, const sensor_msgs::msg::Image::ConstSharedPtr &ImageInput,std::vector<uchar> prev_data)
 {
-    ActualImgR = ci;
-    ActualImg = makeCompressedImageMsgToImage(ci);
+    auto width = ImageInput->width;
+    auto height = ImageInput->height;
+    auto step = ImageInput->step;
+    auto data = ImageInput->data;
 
-    // make your editing stuff;
-    auto EditedImg = ActualImg;
-
-    EditedImgR = makeImageToCompressedImageMsg(EditedImg);
-    ComparisonImg = ActualImg;
-
-    return EditedImgR;
-}
-
-Mat MotionCapture::makeCompressedImageMsgToImage(const sensor_msgs::msg::CompressedImage &ci)
-{
-    Mat frame;
-    cv_bridge::CvImagePtr cv_ptr;
-    try
+    if (prev_data.empty())
     {
-        cv_ptr = cv_bridge::toCvCopy(ci, sensor_msgs::image_encodings::RGB8);
+      for (size_t i = 0; i < data.size(); i++)
+        prev_data.push_back(data[i]);
     }
-    catch (cv_bridge::Exception e)
+    else
     {
-        RCLCPP_ERROR(rclcpp::get_logger("rclcpp"), "cv_bridge exception %s", e.what());
-        return frame;
-    }
+      size_t comp = step / width;
+      for (size_t i = 0; i < data.size(); i += comp)
+      {
+        uchar avg = 0;
+        for (int j = 0; j < comp; j++)
+        {
+          auto a = data[i + j];
+          auto b = prev_data[i + j];
+          auto c = a - b;
 
-    frame = cv_ptr->image;
-    return frame;
+          avg += c;
+
+          prev_data[i + j] = a;
+        }
+
+        avg = (avg < 200 ? 0 : 255);
+        for (int j = 0; j < comp; j++)
+          data[i + j] = avg;
+      }
+    
+    ImageOutput->width = width;
+    ImageOutput->height = height;
+    ImageOutput->step = step;
+    ImageOutput->encoding =ImageInput->encoding;
+    ImageOutput->header =ImageInput->header;
+    ImageOutput->is_bigendian =ImageInput->is_bigendian;
+    ImageOutput->data = data;
+    ImageOutput->data = data;
+    
 }
 
-sensor_msgs::msg::CompressedImage MotionCapture::makeImageToCompressedImageMsg(const Mat &frame)
-{
-    cv_bridge::CvImagePtr cv_ptr;
-    sensor_msgs::msg::CompressedImage Cmsg;
-     Cmsg.header.stamp = rclcpp::Clock().now(); // Set the timestamp to the current time
-    Cmsg.header.frame_id = "camera"; // Set the frame ID
-    //Cmsg.header = msg-> header;
-    Cmsg.format = "jpeg";
-    vector<int> params = {cv::IMWRITE_JPEG_QUALITY, 90};
-    imencode(".jpeg", frame, Cmsg.data, params);
-    return Cmsg;
-}

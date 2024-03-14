@@ -15,14 +15,14 @@ class MotionCapture
 public:
     MotionCapture() {}
 
-    sensor_msgs::msg::CompressedImage detection(const sensor_msgs::msg::CompressedImage &ci);
+    void detection(sensor_msgs::msg::Image::SharedPtr &ImageOutput, const sensor_msgs::msg::Image::ConstSharedPtr &ImageInput,std::vector<uchar> prev_data);
 
 private:
-    Mat makeCompressedImageMsgToImage(const sensor_msgs::msg::CompressedImage &ci);
-    sensor_msgs::msg::CompressedImage makeImageToCompressedImageMsg(const Mat &frame);
+    // Mat makeCompressedImageMsgToImage(const sensor_msgs::msg::Image &ci);
+    // sensor_msgs::msg::Image makeImageToCompressedImageMsg(const Mat &frame);
 
-    sensor_msgs::msg::CompressedImage ActualImgR;
-    sensor_msgs::msg::CompressedImage EditedImgR;
+    sensor_msgs::msg::Image ActualImgR;
+    sensor_msgs::msg::Image EditedImgR;
     Mat ComparisonImg;
     Mat ActualImg;
 };

@@ -46,38 +46,9 @@ public:
 private:
   void topic_callback(const sensor_msgs::msg::Image::ConstSharedPtr &msg)
   {
-    auto width = msg->width;
-    auto height = msg->height;
-    auto step = msg->step;
-    auto data = msg->data;
-
-    if (prev_data.empty())
-    {
-      for (size_t i = 0; i < data.size(); i++)
-        prev_data.push_back(data[i]);
-    }
-    else
-    {
-      for (uint32_t y = 0; y < height; y++)
-      {
-        for (uint32_t x = 0; x < step; x ++)
-        {
-          auto base = x + y * step;
-            auto a = data[base];
-            auto b = prev_data[base];
-
-            data[base] = a - b;
-            prev_data[base] = a;
-        }
-      }
       auto message = std::make_shared<sensor_msgs::msg::Image>();
-      message->width = width;
-      message->height = height;
-      message->step = step;
-      message->encoding = msg->encoding;
-      message->header = msg->header;
-      message->is_bigendian = msg->is_bigendian;
-      message->data = data;
+      mc.detection(message,msg,prev_data);
+      
       pub.publish(message);
     }
   }
