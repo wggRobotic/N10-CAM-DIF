@@ -51,7 +51,7 @@ private:
       
       pub.publish(message);
     }
-  }
+  
 
   image_transport::Subscriber sub;
   image_transport::Publisher pub;
