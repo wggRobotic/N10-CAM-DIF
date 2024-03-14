@@ -46,18 +46,15 @@ public:
 private:
   void topic_callback(const sensor_msgs::msg::Image::ConstSharedPtr &msg)
   {
-      auto message = std::make_shared<sensor_msgs::msg::Image>();
-      mc.detection(message,msg,prev_data);
-      
-      pub.publish(message);
-    }
-  
+    auto message = std::make_shared<sensor_msgs::msg::Image>();
+
+    mc.detectionF(message, msg);
+
+    pub.publish(message);
+  }
 
   image_transport::Subscriber sub;
   image_transport::Publisher pub;
-
-  std::vector<uchar> prev_data;
-
   MotionCapture mc;
 };
 
