@@ -33,14 +33,14 @@ class Kevin : public rclcpp::Node
 {
 public:
   Kevin()
-      : Node("Kevin")
+      : Node("n10_cam_dif_node")
   {
   }
 
   void init(image_transport::ImageTransport &it)
   {
-    sub = it.subscribe("/cam_pub", 10, std::bind(&Kevin::topic_callback, this, std::placeholders::_1));
-    pub = it.advertise("/kevin", 10);
+    sub = it.subscribe("/n10/cam_pub", 10, std::bind(&Kevin::topic_callback, this, std::placeholders::_1));
+    pub = it.advertise("/n10/cam_dif", 10);
   }
 
 private:

@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.8)
-project(cam_dif)
+project(n10_cam_dif)
 
 if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
   add_compile_options(-Wall -Wextra -Wpedantic)
@@ -14,11 +14,11 @@ find_package(OpenCV REQUIRED)
 find_package(cv_bridge REQUIRED)
 find_package(image_transport REQUIRED)
 find_package(compressed_image_transport REQUIRED)
-add_executable(Kevin src/Kevin.cpp src/Motioncapture.cpp)
-target_include_directories(Kevin PUBLIC "include")
-ament_target_dependencies(Kevin rclcpp std_msgs OpenCV sensor_msgs cv_bridge compressed_image_transport image_transport)
+add_executable(cam_dif src/Kevin.cpp src/Motioncapture.cpp)
+target_include_directories(cam_dif PUBLIC "include")
+ament_target_dependencies(cam_dif rclcpp std_msgs OpenCV sensor_msgs cv_bridge compressed_image_transport image_transport)
   install(TARGETS
-    Kevin
+    cam_dif
     DESTINATION lib/${PROJECT_NAME})
 # uncomment the following section in order to fill in
 # further dependencies manually.

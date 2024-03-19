@@ -7,17 +7,7 @@ void MotionCapture::detectionF(sensor_msgs::msg::Image::SharedPtr &ImageOutput, 
     auto step = ImageInput->step;
     auto data = ImageInput->data;
 
-    // height: Die Höhe des Bildes, also die Anzahl der Zeilen.
 
-    // width: Die Breite des Bildes, also die Anzahl der Spalten.
-
-    // encoding: Der Encoding-Typ der Pixel, einschließlich der Bedeutung der Kanäle, der Reihenfolge und der Größe. Die gültigen Werte für das Encoding sind in der Datei src/image_encodings.cpp definiert 1.
-
-    // is_bigendian: Gibt an, ob die Daten in Big-Endian-Reihenfolge sind.
-
-    // step: Die vollständige Zeilenlänge in Bytes.
-
-    // data: Die eigentlichen Matrixdaten. Die Größe ist (step * rows
 
     if (prev_data.empty())
     {
@@ -40,7 +30,7 @@ void MotionCapture::detectionF(sensor_msgs::msg::Image::SharedPtr &ImageOutput, 
                 avg += c;
                 prev_data[pixel + color] = a;
             }
-            avg = (avg < 255 ? 255 : 0);
+            avg = (avg < 255 ? 0 : 255);
             int num = 0;
             for (int color = 0; color < comp; color++)
             {
@@ -65,23 +55,26 @@ void MotionCapture::detectionF(sensor_msgs::msg::Image::SharedPtr &ImageOutput, 
                 num++;
             }
 
-            // wrong stuff end
+
+            
         }
 
-        // old variation
-        // for (uint32_t y = 0; y < height; y++)
+        //cross morphing
+        // for (uint32_t y = 1; y < height-1; y++)
         // {
-        //     for (uint32_t x = 0; x < step; x++)
+        //     for (uint32_t x = 1; x < (width-1)*3; x++)
         //     {
-        //         auto base = x + y * step;
-        //         auto a = data[base];
-        //         auto b = prev_data[base];
-
-        //         data[base] = a - b;
-        //         prev_data[base] = a;
+                
+        //         for (size_t i = 0; i < 3; i++)
+        //         {
+        //             int avgp = 0;
+        //             avgp=(data[(x+1)+y*step+i]+data[(x+1)+(y+1)*step+i]+data[(x+1)+(y-1)*step+i]+data[(x-1)+y*step+i]+data[(x-1)+(y+1)*step+i]+data[(x-1)+(y+1)*step+i]+data[x+(y+1)*step+i]+data[x+(y-1)*step+i]+data[x+y*step+i])/9;
+        //             data[x+y*step+i]= avgp;
+        //         }
+                
         //     }
         // }
-        // End old variation
+        
 
         ImageOutput->width = width;
         ImageOutput->height = height;
