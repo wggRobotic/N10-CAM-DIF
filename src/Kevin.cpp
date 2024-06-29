@@ -39,7 +39,7 @@ public:
 
   void init(image_transport::ImageTransport &it)
   {
-    sub = it.subscribe("/n10/cam_pub", 10, std::bind(&Kevin::topic_callback, this, std::placeholders::_1));
+    sub = it.subscribe("/n10/intel/color", 10, std::bind(&Kevin::topic_callback, this, std::placeholders::_1));
     pub = it.advertise("/n10/cam_dif", 10);
   }
 
