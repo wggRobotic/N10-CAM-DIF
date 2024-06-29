@@ -15,40 +15,34 @@
 #include <chrono>
 #include <functional>
 #include <memory>
-#include <string>
-#include <opencv2/opencv.hpp>
 #include <sensor_msgs/msg/compressed_image.hpp>
-#include <cv_bridge/cv_bridge.h>
+#include <string>
 
+#include "image_transport/image_transport.hpp"
 #include "rclcpp/rclcpp.hpp"
 #include "std_msgs/msg/string.hpp"
-#include "image_transport/image_transport.hpp"
 #include <cam_dif/Motioncapture.hpp>
 
 using namespace std::chrono_literals;
 using std::placeholders::_1;
 
 // Kevin is the guy for communication ;)
-class Kevin : public rclcpp::Node
-{
+class Kevin : public rclcpp::Node {
 public:
-  Kevin()
-      : Node("n10_cam_dif_node")
-  {
-  }
+  Kevin() : Node("n10_cam_dif") {}
 
-  void init(image_transport::ImageTransport &it)
-  {
-    sub = it.subscribe("/n10/intel/color", 10, std::bind(&Kevin::topic_callback, this, std::placeholders::_1));
+  void init(image_transport::ImageTransport &it) {
+    sub = it.subscribe(
+        "/n10/intel/color", 10,
+        std::bind(&Kevin::topic_callback, this, std::placeholders::_1));
     pub = it.advertise("/n10/cam_dif", 10);
   }
 
 private:
-  void topic_callback(const sensor_msgs::msg::Image::ConstSharedPtr &msg)
-  {
+  void topic_callback(const sensor_msgs::msg::Image::ConstSharedPtr &msg) {
     auto message = std::make_shared<sensor_msgs::msg::Image>();
 
-    mc.detectionF(message, msg);
+    mc.detectionI(message, msg);
 
     pub.publish(message);
   }
@@ -58,8 +52,7 @@ private:
   MotionCapture mc;
 };
 
-int main(int argc, char *argv[])
-{
+int main(int argc, char *argv[]) {
   rclcpp::init(argc, argv);
 
   auto kevin = std::make_shared<Kevin>();
